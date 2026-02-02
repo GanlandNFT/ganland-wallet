@@ -1,17 +1,24 @@
 {
   "name": "ganland-wallet",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "HD wallet generation and management for the Fractal Visions ecosystem",
   "type": "module",
   "main": "src/wallet.mjs",
   "bin": {
-    "ganland-wallet": "src/wallet.mjs"
+    "ganland-wallet": "src/wallet.mjs",
+    "ganland-user-wallet": "src/user-wallets.mjs"
   },
   "scripts": {
     "start": "node src/wallet.mjs",
     "balance": "node src/wallet.mjs balance",
     "address": "node src/wallet.mjs address",
-    "chains": "node src/wallet.mjs chains"
+    "chains": "node src/wallet.mjs chains",
+    "user": "node src/user-wallets.mjs",
+    "user:init": "node src/user-wallets.mjs init",
+    "user:create": "node src/user-wallets.mjs create",
+    "user:balance": "node src/user-wallets.mjs balance",
+    "user:transfer": "node src/user-wallets.mjs transfer",
+    "user:list": "node src/user-wallets.mjs list"
   },
   "keywords": [
     "wallet",
@@ -20,7 +27,8 @@
     "optimism",
     "hd-wallet",
     "fractal-visions",
-    "ganland"
+    "ganland",
+    "social-wallet"
   ],
   "author": "GAN <ganlandnft@gmail.com>",
   "license": "MIT",
@@ -29,6 +37,8 @@
     "url": "https://github.com/GanlandNFT/ganland-wallet.git"
   },
   "dependencies": {
+    "@scure/bip32": "^1.4.0",
+    "@scure/bip39": "^1.3.0",
     "viem": "^2.0.0"
   }
 }

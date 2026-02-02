@@ -1,6 +1,38 @@
 # Ganland Wallet System
 
-HD wallet generation and management for the Fractal Visions ecosystem. Create wallets, check balances, and transfer $GAN — all via X/Twitter commands.
+<img width="100" alt="GAN Logo" src="https://raw.githubusercontent.com/GanlandNFT/ganland-brand-kit/main/logos/gan-logo-primary.jpg" align="right">
+
+HD wallet generation and management for the **Fractal Visions** ecosystem. Create wallets, check balances, and transfer $GAN — all via X/Twitter commands.
+
+---
+
+## 💰 Official Wallets & Addresses
+
+### Payment Wallet (GAN Art Service)
+| Field | Value |
+|-------|-------|
+| **Address** | `0x834b9617aa6291dd6d246402b3e05d1e2efe3c55` |
+| **Network** | Base (Chain ID: 8453) |
+| **Purpose** | Receives $GAN payments for art generation |
+| **Access** | BANKR integration via X (@GanlandNFT) |
+| **Basescan** | [View on Basescan](https://basescan.org/address/0x834b9617aa6291dd6d246402b3e05d1e2efe3c55) |
+
+### $GAN Token Contract
+| Field | Value |
+|-------|-------|
+| **Address** | `0xc2fa8cfa51B02fDeb84Bb22d3c9519EAEB498b07` |
+| **Network** | Base |
+| **Type** | ERC-20 |
+| **Decimals** | 18 |
+| **DexScreener** | [View Chart](https://dexscreener.com/base/0xc2fa8cfa51B02fDeb84Bb22d3c9519EAEB498b07) |
+
+### ENS
+| Field | Value |
+|-------|-------|
+| **Name** | `ganland.eth` |
+| **Status** | Owned by Fractal Visions |
+
+---
 
 ## 🎮 X/Twitter Commands
 
@@ -49,7 +81,6 @@ Interact with GAN on X by mentioning [@GanlandNFT](https://x.com/GanlandNFT):
 @GanlandNFT my address
 ```
 > 📍 Your Ganland wallet: 0x1234...abcd
-> View on Basescan: basescan.org/address/0x1234...
 
 ### Help
 ```
@@ -81,7 +112,7 @@ To use it, fund with:
 
 ### HD Wallet Derivation
 
-Each user wallet is deterministically derived from a master seed:
+User wallets are deterministically derived from a master seed:
 
 ```
 Path: m/44'/60'/0'/0/{user_index}
@@ -91,30 +122,20 @@ Index = SHA256(Twitter_User_ID) mod 2^31
 This means:
 - ✅ Same user always gets the same wallet
 - ✅ No private keys stored in database
-- ✅ Wallets can be recovered from master seed
+- ✅ Wallets recoverable from master seed
 - ✅ Standard BIP-44 derivation path
 
 ### Supported Chains
 
 | Chain | ID | Status |
 |-------|-----|--------|
-| Base | 8453 | ✅ Primary |
+| Base | 8453 | ✅ Primary (transfers) |
 | Ethereum | 1 | Read-only |
 | Optimism | 10 | Read-only |
 | Shape | 360 | Read-only |
 | Soneium | 1868 | Read-only |
 | Unichain | 130 | Read-only |
 | Superseed | 5330 | Read-only |
-
-> **Note:** Transfers currently operate on Base only. Multi-chain transfers coming soon.
-
-### Token Contract
-
-```
-$GAN Token: 0xc2fa8cfa51B02fDeb84Bb22d3c9519EAEB498b07
-Network: Base (8453)
-Decimals: 18
-```
 
 ---
 
@@ -139,7 +160,6 @@ node src/user-wallets.mjs init
 ### Create User Wallet
 
 ```bash
-# Create wallet for Twitter user ID 123456789
 node src/user-wallets.mjs create 123456789 cooluser
 ```
 
@@ -152,10 +172,10 @@ node src/user-wallets.mjs balance 123456789
 ### Transfer Between Users
 
 ```bash
-# Transfer to another user by ID
+# To another user
 node src/user-wallets.mjs transfer 123456789 987654321 100000
 
-# Transfer to any address
+# To any address
 node src/user-wallets.mjs transfer 123456789 0x1234...abcd 50000
 ```
 
@@ -163,19 +183,6 @@ node src/user-wallets.mjs transfer 123456789 0x1234...abcd 50000
 
 ```bash
 node src/user-wallets.mjs list
-```
-
-### Legacy Commands (Main Wallet)
-
-```bash
-# Check main GAN wallet balances
-node src/wallet.mjs balance
-
-# Specific chain
-node src/wallet.mjs balance base
-
-# List supported chains
-node src/wallet.mjs chains
 ```
 
 ---
@@ -186,7 +193,7 @@ node src/wallet.mjs chains
 ganland-wallet/
 ├── src/
 │   ├── user-wallets.mjs    # HD wallet system for users
-│   └── wallet.mjs          # Main GAN wallet utilities
+│   └── wallet.mjs          # Multi-chain balance utilities
 ├── package.json
 └── README.md
 ```
@@ -200,21 +207,13 @@ ganland-wallet/
 - All wallets derivable from master seed
 - User database only contains: userId, username, address, createdAt
 
-### Secrets Directory
-
-```
-~/.local/secrets/
-├── ganland-master-seed     # CRITICAL: Backup this!
-├── ganland-wallets.json    # User database (recoverable)
-└── alchemy-api-key         # Optional: For faster RPCs
-```
-
 ---
 
 ## 🔗 Related Projects
 
-- [Fractal Visions Marketplace](https://fractalvisions.io)
+- [GAN Brand Kit](https://github.com/GanlandNFT/ganland-brand-kit)
 - [GAN Art Service](https://github.com/GanlandNFT/gan-art-service)
+- [Fractal Visions Marketplace](https://fractalvisions.io)
 - [fractal-nft-infra](https://github.com/GanlandNFT/fractal-nft-infra) — Smart contracts
 
 ---
@@ -225,4 +224,4 @@ MIT
 
 ---
 
-Built by [GAN](https://x.com/GanlandNFT) 🤖 for the Fractal Visions ecosystem.
+*Built by [GAN](https://x.com/GanlandNFT) 🤖 — Generative Art Network*

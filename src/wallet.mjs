@@ -11,8 +11,9 @@ import { readFileSync } from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
 
-// Default GAN wallet address (ganland.eth)
-const WALLET = '0xF393AA12E547880b76c5b7Ff8151F539011257C6';
+// GAN Treasury wallet - to be configured
+// Note: Old wallet 0xF393...57C6 was deprecated (Austin Griffith scaffold-eth default)
+const WALLET = null; // Set this to the actual Fractal Visions treasury wallet
 
 // Load Alchemy key for faster RPCs
 const ALCHEMY_KEY = (() => {

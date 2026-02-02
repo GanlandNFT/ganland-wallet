@@ -11,11 +11,12 @@ HD wallet generation and management for the **Fractal Visions** ecosystem. Creat
 ### Payment Wallet (GAN Art Service)
 | Field | Value |
 |-------|-------|
-| **Address** | `0x834b9617aa6291dd6d246402b3e05d1e2efe3c55` |
+| **Address** | `0xc4EF7d096541338FBE007E146De4a7Cd99cb9e40` |
 | **Network** | Base (Chain ID: 8453) |
 | **Purpose** | Receives $GAN payments for art generation |
-| **Access** | BANKR integration via X (@GanlandNFT) |
-| **Basescan** | [View on Basescan](https://basescan.org/address/0x834b9617aa6291dd6d246402b3e05d1e2efe3c55) |
+| **Access** | HD-derived, controlled via master seed |
+| **ENS** | `ganland.eth` |
+| **Basescan** | [View on Basescan](https://basescan.org/address/0xc4EF7d096541338FBE007E146De4a7Cd99cb9e40) |
 
 ### $GAN Token Contract
 | Field | Value |

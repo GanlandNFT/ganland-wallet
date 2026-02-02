@@ -76,13 +76,28 @@ const ERC20_ABI = [
 
 // === WALLET DATABASE ===
 
+/**
+ * Get seed fingerprint (first 8 chars of SHA256)
+ * Used to track which seed version created each wallet
+ */
+function getSeedFingerprint() {
+  const mnemonic = getMasterSeed();
+  const hash = createHash('sha256').update(mnemonic).digest('hex');
+  return hash.slice(0, 8);
+}
+
 function loadWalletsDB() {
   try {
     if (existsSync(WALLETS_DB)) {
       return JSON.parse(readFileSync(WALLETS_DB, 'utf8'));
     }
   } catch {}
-  return { users: {}, byAddress: {} };
+  return { 
+    users: {}, 
+    byAddress: {}, 
+    byUsername: {},  // NEW: Track username -> userId mapping
+    seedFingerprint: null  // NEW: Track which seed created these wallets
+  };
 }
 
 function saveWalletsDB(db) {
@@ -90,6 +105,26 @@ function saveWalletsDB(db) {
     mkdirSync(SECRETS_DIR, { recursive: true });
   }
   writeFileSync(WALLETS_DB, JSON.stringify(db, null, 2));
+}
+
+/**
+ * Verify database seed matches current seed
+ * Returns { valid: boolean, dbFingerprint, currentFingerprint }
+ */
+function verifySeedIntegrity() {
+  const db = loadWalletsDB();
+  const currentFingerprint = getSeedFingerprint();
+  
+  if (!db.seedFingerprint) {
+    return { valid: true, dbFingerprint: null, currentFingerprint, isNew: true };
+  }
+  
+  return {
+    valid: db.seedFingerprint === currentFingerprint,
+    dbFingerprint: db.seedFingerprint,
+    currentFingerprint,
+    isNew: false
+  };
 }
 
 // === HD WALLET DERIVATION ===
@@ -150,13 +185,51 @@ function deriveWalletForUser(userId, username) {
 
 /**
  * Get or create wallet for a user
+ * FAILSAFES:
+ * 1. Prevents duplicate usernames (different user IDs, same username)
+ * 2. Tracks seed fingerprint to detect seed changes
+ * 3. Verifies existing wallets match current seed derivation
  */
 function getOrCreateWallet(userId, username) {
   const db = loadWalletsDB();
+  const currentFingerprint = getSeedFingerprint();
   
-  // Check if user already has wallet
+  // Initialize or migrate database
+  if (!db.byUsername) db.byUsername = {};
+  if (!db.seedFingerprint) {
+    db.seedFingerprint = currentFingerprint;
+  }
+  
+  // FAILSAFE 1: Check for seed mismatch
+  if (db.seedFingerprint !== currentFingerprint) {
+    throw new Error(
+      `SEED MISMATCH! Database was created with seed ${db.seedFingerprint}, ` +
+      `but current seed is ${currentFingerprint}. ` +
+      `Existing wallets may be inaccessible. Use 'verify' command to check.`
+    );
+  }
+  
+  // Check if user already has wallet by ID
   if (db.users[userId]) {
+    // Verify the stored address matches derivation (integrity check)
+    const derived = deriveWalletForUser(userId, username);
+    if (derived.address.toLowerCase() !== db.users[userId].address.toLowerCase()) {
+      throw new Error(
+        `WALLET INTEGRITY ERROR! Stored address ${db.users[userId].address} ` +
+        `doesn't match derived address ${derived.address}. Seed may have changed.`
+      );
+    }
     return { wallet: db.users[userId], isNew: false };
+  }
+  
+  // FAILSAFE 2: Check for duplicate username (different userId)
+  const normalizedUsername = username.toLowerCase().replace('@', '');
+  if (db.byUsername[normalizedUsername] && db.byUsername[normalizedUsername] !== userId) {
+    const existingUserId = db.byUsername[normalizedUsername];
+    throw new Error(
+      `USERNAME CONFLICT! @${username} is already registered to user ID ${existingUserId}. ` +
+      `Cannot create wallet for different user ID ${userId} with same username.`
+    );
   }
   
   // Derive new wallet
@@ -168,9 +241,11 @@ function getOrCreateWallet(userId, username) {
     username,
     address: wallet.address,
     index: wallet.index,
-    createdAt: wallet.createdAt
+    createdAt: wallet.createdAt,
+    seedFingerprint: currentFingerprint  // Track which seed created this wallet
   };
   db.byAddress[wallet.address.toLowerCase()] = userId;
+  db.byUsername[normalizedUsername] = userId;
   
   saveWalletsDB(db);
   
@@ -486,6 +561,65 @@ const commands = {
     console.log('Created:', user.createdAt);
   },
   
+  /**
+   * Verify all wallets match current seed derivation
+   */
+  async verify() {
+    const db = loadWalletsDB();
+    const currentFingerprint = getSeedFingerprint();
+    
+    console.log('🔍 Wallet Integrity Verification');
+    console.log('================================');
+    console.log('Current seed fingerprint:', currentFingerprint);
+    console.log('Database seed fingerprint:', db.seedFingerprint || 'not set');
+    console.log('');
+    
+    if (db.seedFingerprint && db.seedFingerprint !== currentFingerprint) {
+      console.log('⚠️  SEED MISMATCH DETECTED!');
+      console.log('   Existing wallets may be inaccessible.');
+      console.log('');
+    }
+    
+    const users = Object.values(db.users || {});
+    let valid = 0;
+    let invalid = 0;
+    
+    for (const user of users) {
+      try {
+        const derived = deriveWalletForUser(user.userId, user.username);
+        if (derived.address.toLowerCase() === user.address.toLowerCase()) {
+          console.log(`✅ @${user.username} (${user.userId}): ${user.address.slice(0, 10)}... OK`);
+          valid++;
+        } else {
+          console.log(`❌ @${user.username} (${user.userId}): MISMATCH`);
+          console.log(`   Stored:  ${user.address}`);
+          console.log(`   Derived: ${derived.address}`);
+          invalid++;
+        }
+      } catch (e) {
+        console.log(`❌ @${user.username}: ERROR - ${e.message}`);
+        invalid++;
+      }
+    }
+    
+    console.log('');
+    console.log(`Results: ${valid} valid, ${invalid} invalid out of ${users.length} wallets`);
+    
+    if (invalid > 0) {
+      console.log('');
+      console.log('⚠️  Some wallets cannot be accessed with current seed!');
+      console.log('   These wallets were created with a different master seed.');
+    }
+  },
+  
+  /**
+   * Show current seed fingerprint
+   */
+  async fingerprint() {
+    const fingerprint = getSeedFingerprint();
+    console.log('Current seed fingerprint:', fingerprint);
+  },
+
   async help() {
     console.log(`
 Ganland User Wallet System
@@ -498,6 +632,8 @@ Commands:
   transfer <fromId> <toIdOrAddress> <amt> Transfer $GAN between users
   list                                    List all registered wallets
   lookup <address>                        Find user by wallet address
+  verify                                  Verify all wallets match current seed
+  fingerprint                             Show current seed fingerprint
   help                                    Show this help
 
 Examples:
@@ -505,7 +641,7 @@ Examples:
   node src/user-wallets.mjs create 123456789 cooluser
   node src/user-wallets.mjs balance 123456789
   node src/user-wallets.mjs transfer 123456789 987654321 100000
-  node src/user-wallets.mjs transfer 123456789 0x1234...abcd 50000
+  node src/user-wallets.mjs verify
 `);
   }
 };

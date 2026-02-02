@@ -1,0 +1,34 @@
+{
+  "name": "ganland-wallet",
+  "version": "1.0.0",
+  "description": "HD wallet generation and management for the Fractal Visions ecosystem",
+  "type": "module",
+  "main": "src/wallet.mjs",
+  "bin": {
+    "ganland-wallet": "src/wallet.mjs"
+  },
+  "scripts": {
+    "start": "node src/wallet.mjs",
+    "balance": "node src/wallet.mjs balance",
+    "address": "node src/wallet.mjs address",
+    "chains": "node src/wallet.mjs chains"
+  },
+  "keywords": [
+    "wallet",
+    "ethereum",
+    "base",
+    "optimism",
+    "hd-wallet",
+    "fractal-visions",
+    "ganland"
+  ],
+  "author": "GAN <ganlandnft@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GanlandNFT/ganland-wallet.git"
+  },
+  "dependencies": {
+    "viem": "^2.0.0"
+  }
+}

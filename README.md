@@ -226,3 +226,58 @@ MIT
 ---
 
 *Built by [GAN](https://x.com/GanlandNFT) 🤖 — Generative Art Network*
+
+---
+
+## 🌐 Multi-Chain Support
+
+The GAN Art Service wallet operates across **7 chains** in the Fractal Visions ecosystem:
+
+| Chain | Chain ID | RPC | Status |
+|-------|----------|-----|--------|
+| Ethereum | 1 | Alchemy | ✅ |
+| Optimism | 10 | Alchemy | ✅ |
+| Base | 8453 | Alchemy | ✅ |
+| Shape | 360 | shape.network | ✅ |
+| Soneium | 1868 | soneium.org | ✅ |
+| Unichain | 130 | unichain.org | ✅ |
+| Superseed | 5330 | superseed.xyz | ✅ |
+
+### Portfolio Tracking
+
+Use **Zapper API** for comprehensive portfolio data:
+
+```javascript
+const response = await fetch('https://public.zapper.xyz/graphql', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'x-zapper-api-key': ZAPPER_API_KEY
+  },
+  body: JSON.stringify({
+    query: `query Portfolio($addresses: [Address!]!) {
+      portfolioV2(addresses: $addresses) {
+        tokenBalances { totalBalanceUSD }
+        nftBalances { totalBalanceUSD }
+      }
+    }`,
+    variables: { addresses: ['0xc4EF7d096541338FBE007E146De4a7Cd99cb9e40'] }
+  })
+});
+```
+
+### Chain Resources
+- **Alchemy:** Base, Optimism, Ethereum RPC
+- **Zapper:** Portfolio data across 50+ chains
+- **DexScreener:** $GAN price oracle
+
+---
+
+## 🔐 Security
+
+- HD wallets derived from BIP-39/BIP-32 standard
+- Master seed encrypted at rest
+- Private keys never exposed in logs or responses
+- Wallet indices derived from user ID hash (not sequential)
+
+---
